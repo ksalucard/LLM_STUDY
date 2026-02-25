@@ -1,0 +1,4 @@
+datetime,symbol,side,price,qty
+2025-10-03 10:00,XAUUSD,buy,2610.0,5
+2025-10-17 09:30,XAGUSD,buy,31.2,200
+2025-11-14 14:00,XAUUSD,sell,2678.0,2
