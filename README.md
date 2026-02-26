@@ -40,6 +40,46 @@ openclaw --help | sed -n '1,160p'
 
 ---
 
+
+## 0.5) 防重装：先做“无损自检 + 备份”
+
+如果你不想反复重装系统，这一步强烈建议先做。核心原则：
+
+- 先检查，不覆盖。
+- 先备份，再修改。
+- 每一步都可回滚。
+
+### 0.5.1 检查端口占用（避免服务互相冲突）
+
+**【在 Bash 执行】**
+
+```bash
+ss -lntp | rg ':4000|:8000|:8080' || true
+```
+
+### 0.5.2 备份你现有 OpenClaw 配置（如果有）
+
+**【在 Bash 执行】**
+
+```bash
+mkdir -p ~/ai-stack/backup
+# 如果你已有配置文件，把路径替换成你自己的实际路径
+cp -av ~/ai-stack/openclaw/config.yaml ~/ai-stack/backup/config.yaml.bak.$(date +%F-%H%M%S) 2>/dev/null || true
+```
+
+### 0.5.3 先做“最小可逆”验证，不直接改系统级服务
+
+**【在 Bash 执行】**
+
+```bash
+# 用当前 shell 临时环境变量测试，不写入 ~/.bashrc
+export KIMI_API_KEY="你的Kimi Key"
+export QWEN_API_KEY="你的Qwen Key"
+```
+
+> 只有你确认链路完全跑通后，再考虑写入 `~/.bashrc` 或 systemd。
+
+---
 ## 1) 安装基础依赖
 
 ### 1.1 系统包
@@ -409,3 +449,39 @@ openclaw --config ~/ai-stack/openclaw/config.yaml run --profile qwen_orchestrato
 2. **网关能起但模型报 401**：通常是 `KIMI_API_KEY/QWEN_API_KEY` 没 export 到当前终端。  
 3. **Kimi 被路由走了 Qwen**：说明把 Kimi 挂进 orchestrator 了，需保持 profile 独立。  
 4. **主模型输出漂移**：把温度压低（0.1~0.3），并强制 JSON 输出。
+
+
+---
+
+## 9) 回滚方案（出问题时不用重装系统）
+
+### 9.1 停掉临时进程
+
+**【在 Bash 执行】**
+
+```bash
+pkill -f "litellm --config" || true
+pkill -f "openclaw --config" || true
+```
+
+### 9.2 恢复 OpenClaw 配置备份
+
+**【在 Bash 执行】**
+
+```bash
+# 先看可用备份
+ls -lah ~/ai-stack/backup/
+# 恢复一个备份（示例）
+cp -av ~/ai-stack/backup/config.yaml.bak.YYYY-MM-DD-HHMMSS ~/ai-stack/openclaw/config.yaml
+```
+
+### 9.3 清理本次 Python 环境（可选）
+
+**【在 Bash 执行】**
+
+```bash
+rm -rf ~/ai-stack/.venv
+python3 -m venv ~/ai-stack/.venv
+```
+
+这样你可以只重建 Python 依赖，不需要重装 Ubuntu。
