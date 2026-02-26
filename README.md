@@ -61,8 +61,17 @@ cd ~/ai-stack
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install litellm openai python-dotenv
+pip install litellm openai
+# 可选：如果你希望把 API Key 放到 .env 再加载，再安装
+# pip install python-dotenv
 ```
+
+这几个包分别做什么：
+
+- `litellm`：本地模型网关进程（你要跑 `litellm --config ...`，所以必须装）。
+- `openai`：示例 Python 代理代码里用 OpenAI 兼容客户端访问本地网关（必须装）。
+- `python-dotenv`：**可选**。只有当你想把 Key 写在 `.env` 文件、再由脚本自动加载时才需要；按本文当前命令用 `export` 的方式，不装也可以。
+
 
 ---
 
